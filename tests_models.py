@@ -1,0 +1,104 @@
+"""
+Tests unitarios para las clases del dominio (models.py).
+Ejecutar con: python -m pytest tests_models.py -v
+"""
+
+import pytest
+from models import Categoria, Ingrediente, Receta
+
+
+# ---------------------------------------------------------------------------
+# Categoria
+# ---------------------------------------------------------------------------
+
+class TestCategoria:
+    def test_descripcion_completa_con_descripcion(self):
+        cat = Categoria(1, "Pasta", "Platos a base de pasta")
+        assert cat.descripcion_completa() == "Pasta: Platos a base de pasta"
+
+    def test_descripcion_completa_sin_descripcion(self):
+        cat = Categoria(1, "Pasta")
+        assert cat.descripcion_completa() == "Pasta"
+
+    def test_str(self):
+        cat = Categoria(1, "Postres", "Dulces")
+        assert str(cat) == "Postres"
+
+
+# ---------------------------------------------------------------------------
+# Ingrediente
+# ---------------------------------------------------------------------------
+
+class TestIngrediente:
+    def setup_method(self):
+        self.ing = Ingrediente(1, "Harina", "g", 0.002, 500.0)
+
+    def test_costo_estimado_positivo(self):
+        assert self.ing.costo_estimado(100) == 0.20
+
+    def test_costo_estimado_cero(self):
+        assert self.ing.costo_estimado(0) == 0.0
+
+    def test_costo_estimado_negativo_lanza_error(self):
+        with pytest.raises(ValueError):
+            self.ing.costo_estimado(-10)
+
+    def test_es_disponible_con_stock_suficiente(self):
+        assert self.ing.es_disponible(100) is True
+
+    def test_es_disponible_exacto(self):
+        assert self.ing.es_disponible(500) is True
+
+    def test_es_disponible_sin_stock_suficiente(self):
+        assert self.ing.es_disponible(501) is False
+
+    def test_es_disponible_sin_cantidad(self):
+        assert self.ing.es_disponible() is True
+
+    def test_str(self):
+        assert str(self.ing) == "Harina (500.0 g)"
+
+
+# ---------------------------------------------------------------------------
+# Receta – es_compleja
+# ---------------------------------------------------------------------------
+
+class TestRecetaEsCompleja:
+    def _receta(self, tiempo: int) -> Receta:
+        return Receta(1, "Test", "", tiempo, "Media", 1)
+
+    def test_no_compleja_por_debajo_limite(self):
+        assert self._receta(59).es_compleja() is False
+
+    def test_compleja_exactamente_en_limite(self):
+        # 60 minutos exactos → compleja
+        assert self._receta(60).es_compleja() is True
+
+    def test_compleja_por_encima_limite(self):
+        assert self._receta(90).es_compleja() is True
+
+    def test_no_compleja_rapida(self):
+        assert self._receta(15).es_compleja() is False
+
+
+# ---------------------------------------------------------------------------
+# Receta – tiempo_formateado
+# ---------------------------------------------------------------------------
+
+class TestRecetaTiempoFormateado:
+    def _receta(self, tiempo: int) -> Receta:
+        return Receta(1, "Test", "", tiempo, "Media", 1)
+
+    def test_solo_minutos(self):
+        assert self._receta(45).tiempo_formateado() == "45min"
+
+    def test_solo_horas(self):
+        # 120 min = 2h exactas
+        assert self._receta(120).tiempo_formateado() == "2h"
+
+    def test_horas_y_minutos(self):
+        # 90 min = 1h 30min
+        assert self._receta(90).tiempo_formateado() == "1h 30min"
+
+    def test_cero_minutos(self):
+        assert self._receta(0).tiempo_formateado() == "0min"
