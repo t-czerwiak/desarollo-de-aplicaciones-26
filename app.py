@@ -4,6 +4,7 @@ Sistema de Gestión del Instituto ORT Cuisine.
 """
 
 import streamlit as st
+from streamlit_option_menu import option_menu
 
 import database as db
 from models import Receta, Ingrediente, Categoria
@@ -43,24 +44,47 @@ def _show_success(msg: str) -> None:
 # Sidebar – Navegación
 # ---------------------------------------------------------------------------
 
-st.sidebar.title("🍳 Chef Master Pro")
+from streamlit_option_menu import option_menu
+
+st.sidebar.title("Chef Master Pro")
 st.sidebar.caption("Instituto ORT Cuisine")
 st.sidebar.divider()
 
-seccion = st.sidebar.radio(
-    "Menú principal",
-    options=["📋 Recetas", "🥦 Ingredientes", "🗂️ Categorías"],
-    label_visibility="collapsed",
-)
+with st.sidebar:
+    seccion = option_menu(
+        menu_title="Menú principal",
+        options=["Recetas", "Ingredientes", "Categorías"],
+        icons=["journal-text", "basket", "tags"],
+        menu_icon="list",
+        default_index=0,
+        styles={
+            "container": {
+                "padding": "0!important",
+                "background-color": "transparent"
+            },
+            "icon": {
+                "font-size": "15px"
+            },
+            "nav-link": {
+                "font-size": "15px",
+                "text-align": "left",
+                "margin": "0px",
+                "--hover-color": "#eee",
+            },
+            "nav-link-selected": {
+                "background-color": "#5856D6",
+            },
+        }
+    )
 
 st.sidebar.divider()
-st.sidebar.info("Sistema de Gestión Gastronómica\n\nInstituto ORT Cuisine © 2024")
+st.sidebar.info("Sistema de Gestión Gastronómica\n\nInstituto ORT Cuisine © 2026")
 
 # ===========================================================================
 # SECCIÓN: RECETAS
 # ===========================================================================
 
-if seccion == "📋 Recetas":
+if seccion == "Recetas":
     st.title("📋 Gestión de Recetas")
 
     tab_lista, tab_nueva, tab_editar, tab_eliminar = st.tabs(
@@ -340,7 +364,7 @@ if seccion == "📋 Recetas":
 # SECCIÓN: INGREDIENTES
 # ===========================================================================
 
-elif seccion == "🥦 Ingredientes":
+elif seccion == "Ingredientes":
     st.title("🥦 Inventario de Ingredientes")
 
     tab_lista, tab_nuevo, tab_editar, tab_eliminar = st.tabs(
@@ -513,7 +537,7 @@ elif seccion == "🥦 Ingredientes":
 # SECCIÓN: CATEGORÍAS
 # ===========================================================================
 
-elif seccion == "🗂️ Categorías":
+elif seccion == "Categorías":
     st.title("🗂️ Categorías de Cocina")
 
     tab_lista, tab_nueva, tab_editar, tab_eliminar = st.tabs(
