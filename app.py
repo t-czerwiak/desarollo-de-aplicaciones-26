@@ -69,10 +69,9 @@ with st.sidebar:
                 "font-size": "15px",
                 "text-align": "left",
                 "margin": "0px",
-                "--hover-color": "#eee",
             },
             "nav-link-selected": {
-                "background-color": "#5856D6",
+                "background-color": "#FF4B4B",
             },
         }
     )
@@ -85,10 +84,10 @@ st.sidebar.info("Sistema de Gestión Gastronómica\n\nInstituto ORT Cuisine © 2
 # ===========================================================================
 
 if seccion == "Recetas":
-    st.title("📋 Gestión de Recetas")
+    st.title("Gestión de Recetas")
 
     tab_lista, tab_nueva, tab_editar, tab_eliminar = st.tabs(
-        ["📄 Listado", "➕ Nueva Receta", "✏️ Editar", "🗑️ Eliminar"]
+        ["Listado", "Nueva Receta", "Editar", "Eliminar"]
     )
 
     # -----------------------------------------------------------------------
@@ -147,10 +146,10 @@ if seccion == "Recetas":
                         st.write(f"**Descripción:** {receta.descripcion or '—'}")
                         st.write(f"**Categoría:** {receta.categoria_nombre or '—'}")
                     with col_b:
-                        st.metric("⏱️ Tiempo", receta.tiempo_formateado())
+                        st.metric("Tiempo", receta.tiempo_formateado())
                         st.write(_badge_dificultad(receta.dificultad))
                         if receta.es_compleja():
-                            st.caption("⚠️ Receta compleja")
+                            st.caption("Receta compleja")
 
                     # Cargar ingredientes al expandir
                     receta_detalle = db.obtener_receta(receta.id)
@@ -214,7 +213,7 @@ if seccion == "Recetas":
             else:
                 st.info("No hay ingredientes registrados. Agregá ingredientes primero.")
 
-            submitted = st.form_submit_button("✅ Guardar receta", type="primary")
+            submitted = st.form_submit_button("Guardar receta", type="primary")
 
         if submitted:
             errores = []
@@ -305,7 +304,7 @@ if seccion == "Recetas":
                                     )
                                     nuevos_ings.append((ing.id, cant))
 
-                    submitted_ed = st.form_submit_button("💾 Guardar cambios", type="primary")
+                    submitted_ed = st.form_submit_button("Guardar cambios", type="primary")
 
                 if submitted_ed:
                     errores = []
@@ -353,7 +352,7 @@ if seccion == "Recetas":
                     f"(categoría: {receta_del.categoria_nombre or '—'}). "
                     f"Esta acción no se puede deshacer."
                 )
-                if st.button("🗑️ Confirmar eliminación", type="primary", key="btn_del_receta"):
+                if st.button("Confirmar eliminación", type="primary", key="btn_del_receta"):
                     ok = db.eliminar_receta(receta_del.id)
                     if ok:
                         _show_success(f"✅ Receta '{receta_del.nombre}' eliminada.")
@@ -365,10 +364,10 @@ if seccion == "Recetas":
 # ===========================================================================
 
 elif seccion == "Ingredientes":
-    st.title("🥦 Inventario de Ingredientes")
+    st.title("Inventario de Ingredientes")
 
     tab_lista, tab_nuevo, tab_editar, tab_eliminar = st.tabs(
-        ["📄 Listado", "➕ Nuevo Ingrediente", "✏️ Editar", "🗑️ Eliminar"]
+        ["Listado", "Nuevo Ingrediente", "Editar", "Eliminar"]
     )
 
     # -----------------------------------------------------------------------
@@ -379,7 +378,7 @@ elif seccion == "Ingredientes":
 
         col1, col2 = st.columns(2)
         with col1:
-            busqueda = st.text_input("🔍 Buscar por nombre", key="busq_ing")
+            busqueda = st.text_input("Buscar por nombre", key="busq_ing")
         with col2:
             solo_disponibles = st.checkbox("Solo con stock disponible", key="filtro_stock")
 
@@ -423,7 +422,7 @@ elif seccion == "Ingredientes":
                 precio_ing = st.number_input("Precio por unidad ($) *", min_value=0.0, value=0.0, step=0.01, format="%.4f")
                 stock_ing = st.number_input("Stock inicial *", min_value=0.0, value=0.0, step=1.0)
 
-            submitted_ing = st.form_submit_button("✅ Guardar ingrediente", type="primary")
+            submitted_ing = st.form_submit_button("Guardar ingrediente", type="primary")
 
         if submitted_ing:
             errores = []
@@ -477,7 +476,7 @@ elif seccion == "Ingredientes":
                             value=ing_ed.stock,
                             step=1.0,
                         )
-                    submitted_ing_ed = st.form_submit_button("💾 Guardar cambios", type="primary")
+                    submitted_ing_ed = st.form_submit_button("Guardar cambios", type="primary")
 
                 if submitted_ing_ed:
                     errores = []
@@ -526,7 +525,7 @@ elif seccion == "Ingredientes":
                     f"(stock: {ing_del.stock} {ing_del.unidad}). "
                     f"Esta acción no se puede deshacer."
                 )
-                if st.button("🗑️ Confirmar eliminación", type="primary", key="btn_del_ing"):
+                if st.button("Confirmar eliminación", type="primary", key="btn_del_ing"):
                     ok = db.eliminar_ingrediente(ing_del.id)
                     if ok:
                         _show_success(f"✅ Ingrediente '{ing_del.nombre}' eliminado.")
@@ -538,10 +537,10 @@ elif seccion == "Ingredientes":
 # ===========================================================================
 
 elif seccion == "Categorías":
-    st.title("🗂️ Categorías de Cocina")
+    st.title("Categorías de Cocina")
 
     tab_lista, tab_nueva, tab_editar, tab_eliminar = st.tabs(
-        ["📄 Listado", "➕ Nueva Categoría", "✏️ Editar", "🗑️ Eliminar"]
+        ["Listado", "Nueva Categoría", "Editar", "Eliminar"]
     )
 
     # -----------------------------------------------------------------------
@@ -555,7 +554,7 @@ elif seccion == "Categorías":
             st.info("No hay categorías registradas.")
         else:
             for cat in categorias:
-                with st.expander(f"🗂️ {cat.nombre}"):
+                with st.expander(f"{cat.nombre}"):
                     st.write(cat.descripcion_completa())
                     recetas_cat = db.listar_recetas(categoria_id=cat.id)
                     if recetas_cat:
@@ -574,7 +573,7 @@ elif seccion == "Categorías":
         with st.form("form_nueva_cat"):
             nombre_cat = st.text_input("Nombre de la categoría *")
             desc_cat = st.text_area("Descripción")
-            submitted_cat = st.form_submit_button("✅ Guardar categoría", type="primary")
+            submitted_cat = st.form_submit_button("Guardar categoría", type="primary")
 
         if submitted_cat:
             if not nombre_cat.strip():
@@ -601,7 +600,7 @@ elif seccion == "Categorías":
                 with st.form("form_editar_cat"):
                     nombre_cat_ed = st.text_input("Nombre *", value=cat_ed_obj.nombre)
                     desc_cat_ed = st.text_area("Descripción", value=cat_ed_obj.descripcion)
-                    submitted_cat_ed = st.form_submit_button("💾 Guardar cambios", type="primary")
+                    submitted_cat_ed = st.form_submit_button("Guardar cambios", type="primary")
 
                 if submitted_cat_ed:
                     if not nombre_cat_ed.strip():
@@ -640,7 +639,7 @@ elif seccion == "Categorías":
                         f"⚠️ Estás por eliminar la categoría **{cat_del_obj.nombre}**. "
                         f"Esta acción no se puede deshacer."
                     )
-                if st.button("🗑️ Confirmar eliminación", type="primary", key="btn_del_cat"):
+                if st.button("Confirmar eliminación", type="primary", key="btn_del_cat"):
                     ok = db.eliminar_categoria(cat_del_obj.id)
                     if ok:
                         _show_success(f"✅ Categoría '{cat_del_obj.nombre}' eliminada.")
