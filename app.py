@@ -138,7 +138,7 @@ if seccion == "Recetas":
             st.caption(f"Se encontraron **{len(recetas)}** receta(s).")
             for receta in recetas:
                 with st.expander(
-                    f"{'🔴' if receta.es_compleja() else '🟢'} {receta.nombre} "
+                    f"{receta.nombre} "
                     f"— {receta.categoria_nombre} | {receta.tiempo_formateado()}"
                 ):
                     col_a, col_b = st.columns([3, 1])
