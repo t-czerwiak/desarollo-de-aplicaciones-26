@@ -4,6 +4,7 @@ Sistema de Gestión del Instituto ORT Cuisine.
 """
 
 import streamlit as st
+from streamlit_option_menu import option_menu
 
 import database as db
 from models import Receta, Ingrediente, Categoria
@@ -440,34 +441,18 @@ def _show_success(msg: str) -> None:
 # Sidebar – Navegación
 # ---------------------------------------------------------------------------
 
-st.sidebar.markdown("""
-<div style="padding: 0.5em 0 1.2em 0;">
-  <div style="font-family:'Playfair Display',serif; font-size:1.75rem; font-weight:700;
-              color:#C8913A; letter-spacing:0.04em; line-height:1.2;">
-    Chef Master<br><span style="font-weight:800;">Pro</span>
-  </div>
-  <div style="font-family:'DM Sans',sans-serif; font-size:0.65rem; letter-spacing:0.18em;
-              text-transform:uppercase; color:#7A7068; margin-top:0.4em;">
-    Instituto ORT Cuisine
-  </div>
-  <div style="border-top:1px solid rgba(200,145,58,0.3); margin-top:1em;"></div>
-</div>
-""", unsafe_allow_html=True)
+st.sidebar.title("🍳 Chef Master Pro")
+st.sidebar.caption("Instituto ORT Cuisine")
+st.sidebar.divider()
 
 seccion = st.sidebar.radio(
     "Menú principal",
-    options=["Recetas", "Ingredientes", "Categorías"],
+    options=["📋 Recetas", "🥦 Ingredientes", "🗂️ Categorías"],
     label_visibility="collapsed",
 )
 
-st.sidebar.markdown("""
-<div style="border-top:1px solid rgba(200,145,58,0.2); margin:0.8em 0 0.8em 0;"></div>
-<div style="font-family:'DM Sans',sans-serif; font-size:0.65rem; letter-spacing:0.1em;
-            color:#5A5048; line-height:1.8; text-transform:uppercase;">
-  Sistema de Gestión Gastronómica<br>
-  <span style="color:#C8913A;">ORT Cuisine</span> &copy; 2024
-</div>
-""", unsafe_allow_html=True)
+st.sidebar.divider()
+st.sidebar.info("Sistema de Gestión Gastronómica\n\nInstituto ORT Cuisine © 2024")
 
 # ===========================================================================
 # SECCIÓN: RECETAS
@@ -528,7 +513,8 @@ if seccion == "Recetas":
             st.caption(f"Se encontraron **{len(recetas)}** receta(s).")
             for receta in recetas:
                 with st.expander(
-                    f"{receta.nombre} — {receta.categoria_nombre} | {receta.tiempo_formateado()}"
+                    f"{'🔴' if receta.es_compleja() else '🟢'} {receta.nombre} "
+                    f"— {receta.categoria_nombre} | {receta.tiempo_formateado()}"
                 ):
                     col_a, col_b = st.columns([3, 1])
                     with col_a:
@@ -943,7 +929,7 @@ elif seccion == "Categorías":
             st.info("No hay categorías registradas.")
         else:
             for cat in categorias:
-                with st.expander(cat.nombre):
+                with st.expander(f"🗂️ {cat.nombre}"):
                     st.write(cat.descripcion_completa())
                     recetas_cat = db.listar_recetas(categoria_id=cat.id)
                     if recetas_cat:
