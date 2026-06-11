@@ -14,13 +14,411 @@ from models import Receta, Ingrediente, Categoria
 
 st.set_page_config(
     page_title="Chef Master Pro",
-    page_icon="🍳",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 # Inicializar la base de datos (crea tablas e inserta datos de ejemplo si es necesario)
 db.init_db()
+
+# ---------------------------------------------------------------------------
+# Estilo visual personalizado
+# ---------------------------------------------------------------------------
+
+_CSS = """
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+    --gold:        #C8913A;
+    --gold-light:  #E0AC5A;
+    --gold-muted:  rgba(200,145,58,0.12);
+    --bg:          #0F0E0B;
+    --bg-card:     #181511;
+    --border:      rgba(200,145,58,0.22);
+    --border-sub:  rgba(255,255,255,0.06);
+    --text:        #F0EBE1;
+    --text-muted:  #7A7068;
+}
+
+/* ── Base ── */
+html, .stApp, [data-testid="stAppViewContainer"] {
+    background-color: var(--bg) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    letter-spacing: 0.025em;
+}
+
+[data-testid="stHeader"] { display: none !important; }
+footer { display: none !important; }
+#MainMenu { display: none !important; }
+
+/* ── Tipografía ── */
+h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif !important;
+    letter-spacing: 0.04em;
+}
+
+h1 {
+    font-size: 2.6rem !important;
+    font-weight: 700 !important;
+    border-bottom: 1px solid var(--gold) !important;
+    padding-bottom: 0.35em !important;
+    margin-bottom: 1.2em !important;
+    line-height: 1.2 !important;
+    color: var(--text) !important;
+}
+
+h2 {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: var(--text) !important;
+}
+
+h3 {
+    font-size: 1.2rem !important;
+    font-weight: 500 !important;
+    color: var(--text) !important;
+}
+
+/* Subheader con acento lateral dorado */
+[data-testid="stHeadingWithActionElements"] h2,
+[data-testid="stHeadingWithActionElements"] h3 {
+    font-family: 'Playfair Display', serif !important;
+    font-weight: 700 !important;
+    border-left: 3px solid var(--gold) !important;
+    padding-left: 0.65em !important;
+    color: var(--text) !important;
+}
+
+/* ── Sidebar ── */
+[data-testid="stSidebar"] {
+    background: #0D0C0A !important;
+    border-right: 1px solid var(--border) !important;
+}
+
+[data-testid="stSidebar"] h1 {
+    font-family: 'Playfair Display', serif !important;
+    color: var(--gold) !important;
+    border-bottom: 1px solid var(--border) !important;
+    font-size: 1.9rem !important;
+    font-weight: 300 !important;
+    letter-spacing: 0.1em !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+    color: var(--text-muted) !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stRadio"] label {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    color: var(--text) !important;
+    transition: color 0.2s ease;
+}
+
+[data-testid="stSidebar"] [data-testid="stRadio"] label:hover {
+    color: var(--gold) !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stInfo"],
+[data-testid="stSidebar"] [data-testid="stAlert"] {
+    background: rgba(200,145,58,0.07) !important;
+    border: none !important;
+    border-left: 2px solid var(--gold) !important;
+    border-radius: 1px !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.06em !important;
+    color: var(--text-muted) !important;
+}
+
+/* ── Tabs ── */
+.stTabs [data-baseweb="tab-list"] {
+    background: transparent !important;
+    border-bottom: 1px solid var(--border) !important;
+    gap: 0 !important;
+}
+
+.stTabs [data-baseweb="tab"] {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: var(--text-muted) !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0.65em 1.5em !important;
+    transition: color 0.2s ease !important;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    color: var(--text) !important;
+    background: var(--gold-muted) !important;
+}
+
+.stTabs [aria-selected="true"][data-baseweb="tab"] {
+    color: var(--gold) !important;
+    background: transparent !important;
+}
+
+.stTabs [data-baseweb="tab-highlight"] {
+    background-color: var(--gold) !important;
+    height: 2px !important;
+}
+
+.stTabs [data-baseweb="tab-border"] { display: none !important; }
+
+.stTabs [data-baseweb="tab-panel"] {
+    padding-top: 1.5em !important;
+}
+
+/* ── Botones ── */
+.stButton > button,
+[data-testid="stFormSubmitButton"] > button {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    border-radius: 2px !important;
+    transition: all 0.2s ease !important;
+}
+
+.stButton > button[kind="primary"],
+[data-testid="stFormSubmitButton"] > button[kind="primary"] {
+    background: var(--gold) !important;
+    border-color: var(--gold) !important;
+    color: #0A0908 !important;
+}
+
+.stButton > button[kind="primary"]:hover,
+[data-testid="stFormSubmitButton"] > button[kind="primary"]:hover {
+    background: var(--gold-light) !important;
+    border-color: var(--gold-light) !important;
+    box-shadow: 0 0 18px rgba(200,145,58,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+.stButton > button:not([kind="primary"]):hover {
+    border-color: var(--gold) !important;
+    color: var(--gold) !important;
+    background: var(--gold-muted) !important;
+}
+
+/* ── Inputs ── */
+.stTextInput input,
+.stNumberInput input,
+.stTextArea textarea {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-sub) !important;
+    color: var(--text) !important;
+    border-radius: 2px !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 0.03em !important;
+    transition: border-color 0.2s ease !important;
+}
+
+.stTextInput input:focus,
+.stNumberInput input:focus,
+.stTextArea textarea:focus {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 1px rgba(200,145,58,0.4) !important;
+}
+
+/* Selectbox */
+[data-baseweb="select"] > div {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-sub) !important;
+    color: var(--text) !important;
+    border-radius: 2px !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.85rem !important;
+    transition: border-color 0.2s ease !important;
+}
+
+[data-baseweb="select"] > div:hover {
+    border-color: var(--gold) !important;
+}
+
+[data-baseweb="popover"],
+[data-baseweb="menu"] {
+    background: #1C1913 !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 2px !important;
+}
+
+[data-baseweb="option"]:hover {
+    background: var(--gold-muted) !important;
+}
+
+/* Labels */
+.stTextInput label p,
+.stSelectbox label p,
+.stNumberInput label p,
+.stTextArea label p,
+.stCheckbox label p,
+[data-testid="stWidgetLabel"] p {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    color: var(--text-muted) !important;
+}
+
+/* ── Expanders ── */
+[data-testid="stExpander"] {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-sub) !important;
+    border-radius: 2px !important;
+    margin-bottom: 0.5em !important;
+    transition: border-color 0.2s ease !important;
+}
+
+[data-testid="stExpander"]:hover {
+    border-color: var(--border) !important;
+}
+
+[data-testid="stExpander"] summary {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.76rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    padding: 0.85em 1em !important;
+    color: var(--text) !important;
+}
+
+[data-testid="stExpanderDetails"] {
+    border-top: 1px solid var(--border-sub) !important;
+    padding: 1em 1.2em !important;
+}
+
+/* ── Métricas ── */
+[data-testid="metric-container"] {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-sub) !important;
+    border-left: 3px solid var(--gold) !important;
+    border-radius: 2px !important;
+    padding: 0.9em 1.1em !important;
+}
+
+[data-testid="stMetricLabel"] p {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0.16em !important;
+    text-transform: uppercase !important;
+    color: var(--text-muted) !important;
+}
+
+[data-testid="stMetricValue"] {
+    font-family: 'Playfair Display', serif !important;
+    font-size: 1.9rem !important;
+    font-weight: 700 !important;
+    color: var(--gold) !important;
+}
+
+/* ── Tablas ── */
+.stTable table {
+    border: none !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.04em !important;
+    width: 100% !important;
+}
+
+.stTable th {
+    background: rgba(200,145,58,0.1) !important;
+    color: var(--gold) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    font-size: 0.65rem !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 0.65em 0.9em !important;
+}
+
+.stTable td {
+    border-bottom: 1px solid var(--border-sub) !important;
+    color: var(--text) !important;
+    padding: 0.55em 0.9em !important;
+}
+
+.stTable tr:hover td {
+    background: var(--gold-muted) !important;
+}
+
+/* ── Divider ── */
+hr {
+    border: none !important;
+    border-top: 1px solid var(--border) !important;
+    margin: 1.5em 0 !important;
+}
+
+/* ── Alerts ── */
+[data-testid="stAlert"] {
+    border-radius: 2px !important;
+    border: none !important;
+    border-left: 3px solid !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.04em !important;
+}
+
+/* ── Caption ── */
+[data-testid="stCaptionContainer"] p {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    color: var(--text-muted) !important;
+}
+
+/* ── Texto general ── */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li {
+    font-family: 'DM Sans', sans-serif !important;
+    line-height: 1.75 !important;
+    color: var(--text) !important;
+    font-size: 0.88rem !important;
+}
+
+/* ── Contenedor principal ── */
+[data-testid="block-container"] {
+    padding-top: 2.5rem !important;
+    max-width: 1200px !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+/* ── Checkbox ── */
+[data-testid="stCheckbox"] label {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.04em !important;
+    color: var(--text) !important;
+}
+
+/* ── Form container ── */
+[data-testid="stForm"] {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-sub) !important;
+    border-radius: 2px !important;
+    padding: 1.5em !important;
+}
+"""
+
+st.markdown(f"<style>{_CSS}</style>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -30,8 +428,7 @@ DIFICULTADES = ["Baja", "Media", "Alta"]
 
 
 def _badge_dificultad(dificultad: str) -> str:
-    colores = {"Baja": "🟢", "Media": "🟡", "Alta": "🔴"}
-    return colores.get(dificultad, "⚪") + " " + dificultad
+    return dificultad
 
 
 def _show_success(msg: str) -> None:
@@ -43,28 +440,44 @@ def _show_success(msg: str) -> None:
 # Sidebar – Navegación
 # ---------------------------------------------------------------------------
 
-st.sidebar.title("🍳 Chef Master Pro")
-st.sidebar.caption("Instituto ORT Cuisine")
-st.sidebar.divider()
+st.sidebar.markdown("""
+<div style="padding: 0.5em 0 1.2em 0;">
+  <div style="font-family:'Playfair Display',serif; font-size:1.75rem; font-weight:700;
+              color:#C8913A; letter-spacing:0.04em; line-height:1.2;">
+    Chef Master<br><span style="font-weight:800;">Pro</span>
+  </div>
+  <div style="font-family:'DM Sans',sans-serif; font-size:0.65rem; letter-spacing:0.18em;
+              text-transform:uppercase; color:#7A7068; margin-top:0.4em;">
+    Instituto ORT Cuisine
+  </div>
+  <div style="border-top:1px solid rgba(200,145,58,0.3); margin-top:1em;"></div>
+</div>
+""", unsafe_allow_html=True)
 
 seccion = st.sidebar.radio(
     "Menú principal",
-    options=["📋 Recetas", "🥦 Ingredientes", "🗂️ Categorías"],
+    options=["Recetas", "Ingredientes", "Categorías"],
     label_visibility="collapsed",
 )
 
-st.sidebar.divider()
-st.sidebar.info("Sistema de Gestión Gastronómica\n\nInstituto ORT Cuisine © 2024")
+st.sidebar.markdown("""
+<div style="border-top:1px solid rgba(200,145,58,0.2); margin:0.8em 0 0.8em 0;"></div>
+<div style="font-family:'DM Sans',sans-serif; font-size:0.65rem; letter-spacing:0.1em;
+            color:#5A5048; line-height:1.8; text-transform:uppercase;">
+  Sistema de Gestión Gastronómica<br>
+  <span style="color:#C8913A;">ORT Cuisine</span> &copy; 2024
+</div>
+""", unsafe_allow_html=True)
 
 # ===========================================================================
 # SECCIÓN: RECETAS
 # ===========================================================================
 
-if seccion == "📋 Recetas":
-    st.title("📋 Gestión de Recetas")
+if seccion == "Recetas":
+    st.title("Gestión de Recetas")
 
     tab_lista, tab_nueva, tab_editar, tab_eliminar = st.tabs(
-        ["📄 Listado", "➕ Nueva Receta", "✏️ Editar", "🗑️ Eliminar"]
+        ["Listado", "Nueva Receta", "Editar", "Eliminar"]
     )
 
     # -----------------------------------------------------------------------
@@ -115,18 +528,17 @@ if seccion == "📋 Recetas":
             st.caption(f"Se encontraron **{len(recetas)}** receta(s).")
             for receta in recetas:
                 with st.expander(
-                    f"{'🔴' if receta.es_compleja() else '🟢'} {receta.nombre} "
-                    f"— {receta.categoria_nombre} | {receta.tiempo_formateado()}"
+                    f"{receta.nombre} — {receta.categoria_nombre} | {receta.tiempo_formateado()}"
                 ):
                     col_a, col_b = st.columns([3, 1])
                     with col_a:
                         st.write(f"**Descripción:** {receta.descripcion or '—'}")
                         st.write(f"**Categoría:** {receta.categoria_nombre or '—'}")
                     with col_b:
-                        st.metric("⏱️ Tiempo", receta.tiempo_formateado())
+                        st.metric("Tiempo", receta.tiempo_formateado())
                         st.write(_badge_dificultad(receta.dificultad))
                         if receta.es_compleja():
-                            st.caption("⚠️ Receta compleja")
+                            st.caption("Receta compleja")
 
                     # Cargar ingredientes al expandir
                     receta_detalle = db.obtener_receta(receta.id)
@@ -190,7 +602,7 @@ if seccion == "📋 Recetas":
             else:
                 st.info("No hay ingredientes registrados. Agregá ingredientes primero.")
 
-            submitted = st.form_submit_button("✅ Guardar receta", type="primary")
+            submitted = st.form_submit_button("Guardar receta", type="primary")
 
         if submitted:
             errores = []
@@ -212,7 +624,7 @@ if seccion == "📋 Recetas":
                     cat_id,
                     ingredientes_seleccionados,
                 )
-                _show_success(f"✅ Receta '{nombre.strip()}' creada correctamente.")
+                _show_success(f"Receta '{nombre.strip()}' creada correctamente.")
 
     # -----------------------------------------------------------------------
     # Tab: Editar receta
@@ -281,7 +693,7 @@ if seccion == "📋 Recetas":
                                     )
                                     nuevos_ings.append((ing.id, cant))
 
-                    submitted_ed = st.form_submit_button("💾 Guardar cambios", type="primary")
+                    submitted_ed = st.form_submit_button("Guardar cambios", type="primary")
 
                 if submitted_ed:
                     errores = []
@@ -305,7 +717,7 @@ if seccion == "📋 Recetas":
                             nuevos_ings,
                         )
                         if ok:
-                            _show_success(f"✅ Receta '{nombre_ed.strip()}' actualizada correctamente.")
+                            _show_success(f"Receta '{nombre_ed.strip()}' actualizada correctamente.")
                         else:
                             st.error("No se pudo actualizar la receta.")
 
@@ -325,14 +737,14 @@ if seccion == "📋 Recetas":
             receta_del = db.obtener_receta(opciones_del[sel_del])
             if receta_del:
                 st.warning(
-                    f"⚠️ Estás por eliminar **{receta_del.nombre}** "
+                    f"Estás por eliminar **{receta_del.nombre}** "
                     f"(categoría: {receta_del.categoria_nombre or '—'}). "
                     f"Esta acción no se puede deshacer."
                 )
-                if st.button("🗑️ Confirmar eliminación", type="primary", key="btn_del_receta"):
+                if st.button("Confirmar eliminación", type="primary", key="btn_del_receta"):
                     ok = db.eliminar_receta(receta_del.id)
                     if ok:
-                        _show_success(f"✅ Receta '{receta_del.nombre}' eliminada.")
+                        _show_success(f"Receta '{receta_del.nombre}' eliminada.")
                     else:
                         st.error("No se pudo eliminar la receta.")
 
@@ -340,11 +752,11 @@ if seccion == "📋 Recetas":
 # SECCIÓN: INGREDIENTES
 # ===========================================================================
 
-elif seccion == "🥦 Ingredientes":
-    st.title("🥦 Inventario de Ingredientes")
+elif seccion == "Ingredientes":
+    st.title("Inventario de Ingredientes")
 
     tab_lista, tab_nuevo, tab_editar, tab_eliminar = st.tabs(
-        ["📄 Listado", "➕ Nuevo Ingrediente", "✏️ Editar", "🗑️ Eliminar"]
+        ["Listado", "Nuevo Ingrediente", "Editar", "Eliminar"]
     )
 
     # -----------------------------------------------------------------------
@@ -355,7 +767,7 @@ elif seccion == "🥦 Ingredientes":
 
         col1, col2 = st.columns(2)
         with col1:
-            busqueda = st.text_input("🔍 Buscar por nombre", key="busq_ing")
+            busqueda = st.text_input("Buscar por nombre", key="busq_ing")
         with col2:
             solo_disponibles = st.checkbox("Solo con stock disponible", key="filtro_stock")
 
@@ -377,7 +789,7 @@ elif seccion == "🥦 Ingredientes":
                     "Unidad": ing.unidad,
                     "Stock": f"{ing.stock} {ing.unidad}",
                     "Precio/Unidad": f"${ing.precio_unitario:.4f}",
-                    "Disponible": "✅" if ing.es_disponible(0.01) else "❌",
+                    "Disponible": "Sí" if ing.es_disponible(0.01) else "No",
                     "Costo (100 u.)": f"${ing.costo_estimado(100):.2f}",
                 }
                 for ing in ingredientes
@@ -399,7 +811,7 @@ elif seccion == "🥦 Ingredientes":
                 precio_ing = st.number_input("Precio por unidad ($) *", min_value=0.0, value=0.0, step=0.01, format="%.4f")
                 stock_ing = st.number_input("Stock inicial *", min_value=0.0, value=0.0, step=1.0)
 
-            submitted_ing = st.form_submit_button("✅ Guardar ingrediente", type="primary")
+            submitted_ing = st.form_submit_button("Guardar ingrediente", type="primary")
 
         if submitted_ing:
             errores = []
@@ -417,7 +829,7 @@ elif seccion == "🥦 Ingredientes":
                     st.error(e)
             else:
                 db.crear_ingrediente(nombre_ing.strip(), unidad_ing.strip(), precio_ing, stock_ing)
-                _show_success(f"✅ Ingrediente '{nombre_ing.strip()}' creado correctamente.")
+                _show_success(f"Ingrediente '{nombre_ing.strip()}' creado correctamente.")
 
     # -----------------------------------------------------------------------
     # Tab: Editar ingrediente
@@ -453,7 +865,7 @@ elif seccion == "🥦 Ingredientes":
                             value=ing_ed.stock,
                             step=1.0,
                         )
-                    submitted_ing_ed = st.form_submit_button("💾 Guardar cambios", type="primary")
+                    submitted_ing_ed = st.form_submit_button("Guardar cambios", type="primary")
 
                 if submitted_ing_ed:
                     errores = []
@@ -478,7 +890,7 @@ elif seccion == "🥦 Ingredientes":
                             stock_ing_ed,
                         )
                         if ok:
-                            _show_success(f"✅ Ingrediente '{nombre_ing_ed.strip()}' actualizado.")
+                            _show_success(f"Ingrediente '{nombre_ing_ed.strip()}' actualizado.")
                         else:
                             st.error("No se pudo actualizar el ingrediente.")
 
@@ -498,14 +910,14 @@ elif seccion == "🥦 Ingredientes":
 
             if ing_del:
                 st.warning(
-                    f"⚠️ Estás por eliminar el ingrediente **{ing_del.nombre}** "
+                    f"Estás por eliminar el ingrediente **{ing_del.nombre}** "
                     f"(stock: {ing_del.stock} {ing_del.unidad}). "
                     f"Esta acción no se puede deshacer."
                 )
-                if st.button("🗑️ Confirmar eliminación", type="primary", key="btn_del_ing"):
+                if st.button("Confirmar eliminación", type="primary", key="btn_del_ing"):
                     ok = db.eliminar_ingrediente(ing_del.id)
                     if ok:
-                        _show_success(f"✅ Ingrediente '{ing_del.nombre}' eliminado.")
+                        _show_success(f"Ingrediente '{ing_del.nombre}' eliminado.")
                     else:
                         st.error("No se pudo eliminar el ingrediente.")
 
@@ -513,11 +925,11 @@ elif seccion == "🥦 Ingredientes":
 # SECCIÓN: CATEGORÍAS
 # ===========================================================================
 
-elif seccion == "🗂️ Categorías":
-    st.title("🗂️ Categorías de Cocina")
+elif seccion == "Categorías":
+    st.title("Categorías de Cocina")
 
     tab_lista, tab_nueva, tab_editar, tab_eliminar = st.tabs(
-        ["📄 Listado", "➕ Nueva Categoría", "✏️ Editar", "🗑️ Eliminar"]
+        ["Listado", "Nueva Categoría", "Editar", "Eliminar"]
     )
 
     # -----------------------------------------------------------------------
@@ -531,7 +943,7 @@ elif seccion == "🗂️ Categorías":
             st.info("No hay categorías registradas.")
         else:
             for cat in categorias:
-                with st.expander(f"🗂️ {cat.nombre}"):
+                with st.expander(cat.nombre):
                     st.write(cat.descripcion_completa())
                     recetas_cat = db.listar_recetas(categoria_id=cat.id)
                     if recetas_cat:
@@ -550,14 +962,14 @@ elif seccion == "🗂️ Categorías":
         with st.form("form_nueva_cat"):
             nombre_cat = st.text_input("Nombre de la categoría *")
             desc_cat = st.text_area("Descripción")
-            submitted_cat = st.form_submit_button("✅ Guardar categoría", type="primary")
+            submitted_cat = st.form_submit_button("Guardar categoría", type="primary")
 
         if submitted_cat:
             if not nombre_cat.strip():
                 st.error("El nombre de la categoría no puede estar vacío.")
             else:
                 db.crear_categoria(nombre_cat.strip(), desc_cat.strip())
-                _show_success(f"✅ Categoría '{nombre_cat.strip()}' creada correctamente.")
+                _show_success(f"Categoría '{nombre_cat.strip()}' creada correctamente.")
 
     # -----------------------------------------------------------------------
     # Tab: Editar categoría
@@ -577,7 +989,7 @@ elif seccion == "🗂️ Categorías":
                 with st.form("form_editar_cat"):
                     nombre_cat_ed = st.text_input("Nombre *", value=cat_ed_obj.nombre)
                     desc_cat_ed = st.text_area("Descripción", value=cat_ed_obj.descripcion)
-                    submitted_cat_ed = st.form_submit_button("💾 Guardar cambios", type="primary")
+                    submitted_cat_ed = st.form_submit_button("Guardar cambios", type="primary")
 
                 if submitted_cat_ed:
                     if not nombre_cat_ed.strip():
@@ -585,7 +997,7 @@ elif seccion == "🗂️ Categorías":
                     else:
                         ok = db.actualizar_categoria(cat_ed_obj.id, nombre_cat_ed.strip(), desc_cat_ed.strip())
                         if ok:
-                            _show_success(f"✅ Categoría '{nombre_cat_ed.strip()}' actualizada.")
+                            _show_success(f"Categoría '{nombre_cat_ed.strip()}' actualizada.")
                         else:
                             st.error("No se pudo actualizar la categoría.")
 
@@ -607,18 +1019,18 @@ elif seccion == "🗂️ Categorías":
                 recetas_cat = db.listar_recetas(categoria_id=cat_del_obj.id)
                 if recetas_cat:
                     st.warning(
-                        f"⚠️ La categoría **{cat_del_obj.nombre}** tiene "
+                        f"La categoría **{cat_del_obj.nombre}** tiene "
                         f"{len(recetas_cat)} receta(s) asociada(s). "
                         f"Las recetas quedarán sin categoría si continuás."
                     )
                 else:
                     st.warning(
-                        f"⚠️ Estás por eliminar la categoría **{cat_del_obj.nombre}**. "
+                        f"Estás por eliminar la categoría **{cat_del_obj.nombre}**. "
                         f"Esta acción no se puede deshacer."
                     )
-                if st.button("🗑️ Confirmar eliminación", type="primary", key="btn_del_cat"):
+                if st.button("Confirmar eliminación", type="primary", key="btn_del_cat"):
                     ok = db.eliminar_categoria(cat_del_obj.id)
                     if ok:
-                        _show_success(f"✅ Categoría '{cat_del_obj.nombre}' eliminada.")
+                        _show_success(f"Categoría '{cat_del_obj.nombre}' eliminada.")
                     else:
                         st.error("No se pudo eliminar la categoría.")
