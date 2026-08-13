@@ -41,7 +41,8 @@ def init_db() -> None:
                 descripcion         TEXT    DEFAULT '',
                 tiempo_preparacion  INTEGER NOT NULL DEFAULT 0,
                 dificultad          TEXT    NOT NULL DEFAULT 'Media',
-                categoria_id        INTEGER REFERENCES categorias(id) ON DELETE SET NULL
+                categoria_id        INTEGER REFERENCES categorias(id) ON DELETE SET NULL,
+                preparacion         TEXT    NOT NULL DEFAULT ''
             );
 
             CREATE TABLE IF NOT EXISTS ingredientes (
@@ -60,12 +61,25 @@ def init_db() -> None:
             );
             """
         )
+        _migrar_esquema(conn)
         primera_vez = _seed_data(conn)
 
     # Fuera del bloque anterior para que las categorías ya estén confirmadas
     # cuando el importador abra su propia conexión.
     if primera_vez:
         _importar_dataset_inicial()
+
+
+def _migrar_esquema(conn: sqlite3.Connection) -> None:
+    """
+    Agrega al vuelo las columnas que falten en bases ya creadas.
+
+    CREATE TABLE IF NOT EXISTS no modifica una tabla que ya existe, así que sin
+    esto una base vieja se quedaría sin las columnas nuevas.
+    """
+    columnas = {row["name"] for row in conn.execute("PRAGMA table_info(recetas)")}
+    if "preparacion" not in columnas:
+        conn.execute("ALTER TABLE recetas ADD COLUMN preparacion TEXT NOT NULL DEFAULT ''")
 
 
 def _importar_dataset_inicial() -> None:
@@ -125,14 +139,48 @@ def _seed_data(conn: sqlite3.Connection) -> bool:
     ing = {r["nombre"]: r["id"] for r in conn.execute("SELECT id, nombre FROM ingredientes")}
 
     recetas = [
-        ("Spaghetti Bolognese", "Clásica pasta italiana con salsa de carne", 45, "Media", cat["Pasta"]),
-        ("Tarta de Manzana", "Postre casero de manzana con masa quebrada", 90, "Alta", cat["Postres"]),
-        ("Pollo al Limón", "Pechuga de pollo marinada con limón y hierbas", 35, "Baja", cat["Carnes"]),
-        ("Sopa de Tomate", "Crema de tomate fresca con albahaca", 30, "Baja", cat["Sopas"]),
-        ("Ensalada César", "Ensalada con aderezo césar y crutones", 15, "Baja", cat["Ensaladas"]),
+        (
+            "Spaghetti Bolognese", "Clásica pasta italiana con salsa de carne", 45, "Media", cat["Pasta"],
+            "Hervir abundante agua con sal en una olla grande.\n"
+            "Dorar la carne molida con el ajo picado y el aceite de oliva.\n"
+            "Agregar el tomate y cocinar la salsa a fuego bajo 20 minutos.\n"
+            "Cocinar la pasta seca hasta que esté al dente.\n"
+            "Mezclar la pasta con la salsa y servir con parmesano rallado.",
+        ),
+        (
+            "Tarta de Manzana", "Postre casero de manzana con masa quebrada", 90, "Alta", cat["Postres"],
+            "Mezclar la harina con la manteca fría hasta lograr un arenado.\n"
+            "Agregar el huevo y formar la masa. Descansar 30 minutos en la heladera.\n"
+            "Estirar la masa y forrar un molde de tarta.\n"
+            "Pelar las manzanas, cortarlas en gajos finos y acomodarlas en espiral.\n"
+            "Espolvorear con azúcar y hornear 40 minutos a 180 grados.",
+        ),
+        (
+            "Pollo al Limón", "Pechuga de pollo marinada con limón y hierbas", 35, "Baja", cat["Carnes"],
+            "Marinar las pechugas con jugo de limón, ajo picado, sal y pimienta.\n"
+            "Calentar el aceite de oliva en una sartén.\n"
+            "Sellar el pollo 5 minutos de cada lado.\n"
+            "Bajar el fuego y terminar la cocción tapado 15 minutos.\n"
+            "Dejar reposar unos minutos antes de servir.",
+        ),
+        (
+            "Sopa de Tomate", "Crema de tomate fresca con albahaca", 30, "Baja", cat["Sopas"],
+            "Saltear el tomate cortado en cubos con aceite de oliva.\n"
+            "Agregar agua caliente y sal. Cocinar 15 minutos.\n"
+            "Procesar hasta obtener una crema lisa.\n"
+            "Corregir la sal y sumar la albahaca fresca al final.",
+        ),
+        (
+            "Ensalada César", "Ensalada con aderezo césar y crutones", 15, "Baja", cat["Ensaladas"],
+            "Lavar y cortar la lechuga en trozos grandes.\n"
+            "Preparar el aderezo con aceite de oliva, ajo y parmesano.\n"
+            "Tostar los crutones en la sartén.\n"
+            "Mezclar todo justo antes de servir para que no se ablande.",
+        ),
     ]
     conn.executemany(
-        "INSERT INTO recetas (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO recetas (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id, preparacion) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
         recetas,
     )
 
@@ -297,7 +345,8 @@ def listar_recetas(
     """
     query = """
         SELECT r.id, r.nombre, r.descripcion, r.tiempo_preparacion,
-               r.dificultad, r.categoria_id, COALESCE(c.nombre, '') AS categoria_nombre
+               r.dificultad, r.categoria_id, r.preparacion,
+               COALESCE(c.nombre, '') AS categoria_nombre
         FROM recetas r
         LEFT JOIN categorias c ON r.categoria_id = c.id
         WHERE 1=1
@@ -327,6 +376,7 @@ def listar_recetas(
             r["dificultad"],
             r["categoria_id"],
             r["categoria_nombre"],
+            r["preparacion"],
         )
         recetas.append(receta)
     return recetas
@@ -338,7 +388,8 @@ def obtener_receta(receta_id: int) -> Optional[Receta]:
         row = conn.execute(
             """
             SELECT r.id, r.nombre, r.descripcion, r.tiempo_preparacion,
-                   r.dificultad, r.categoria_id, COALESCE(c.nombre, '') AS categoria_nombre
+                   r.dificultad, r.categoria_id, r.preparacion,
+                   COALESCE(c.nombre, '') AS categoria_nombre
             FROM recetas r
             LEFT JOIN categorias c ON r.categoria_id = c.id
             WHERE r.id = ?
@@ -355,6 +406,7 @@ def obtener_receta(receta_id: int) -> Optional[Receta]:
             row["dificultad"],
             row["categoria_id"],
             row["categoria_nombre"],
+            row["preparacion"],
         )
         ing_rows = conn.execute(
             """
@@ -378,16 +430,19 @@ def crear_receta(
     dificultad: str,
     categoria_id: Optional[int],
     ingredientes: list[tuple[int, float]],
+    preparacion: str = "",
 ) -> Receta:
     """
     Crea una receta con sus ingredientes asociados.
 
     :param ingredientes: Lista de tuplas (ingrediente_id, cantidad).
+    :param preparacion:  Pasos de preparación, uno por renglón.
     """
     with get_connection() as conn:
         cur = conn.execute(
-            "INSERT INTO recetas (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id) VALUES (?, ?, ?, ?, ?)",
-            (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id),
+            "INSERT INTO recetas (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id, preparacion) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id, preparacion),
         )
         receta_id = cur.lastrowid
         if ingredientes:
@@ -406,21 +461,24 @@ def actualizar_receta(
     dificultad: str,
     categoria_id: Optional[int],
     ingredientes: list[tuple[int, float]],
+    preparacion: str = "",
 ) -> bool:
     """
     Actualiza una receta y reemplaza sus ingredientes.
 
     :param ingredientes: Lista de tuplas (ingrediente_id, cantidad).
+    :param preparacion:  Pasos de preparación, uno por renglón.
     :returns: True si se actualizó el registro.
     """
     with get_connection() as conn:
         cur = conn.execute(
             """
             UPDATE recetas
-            SET nombre=?, descripcion=?, tiempo_preparacion=?, dificultad=?, categoria_id=?
+            SET nombre=?, descripcion=?, tiempo_preparacion=?, dificultad=?,
+                categoria_id=?, preparacion=?
             WHERE id=?
             """,
-            (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id, receta_id),
+            (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id, preparacion, receta_id),
         )
         if cur.rowcount == 0:
             return False

@@ -1,16 +1,16 @@
-nombre,descripcion,tiempo_preparacion,dificultad,categoria
-Lasaña de Verduras,Capas de pasta con vegetales asados y salsa blanca,75,Alta,Pasta
-Ñoquis de Papa,Ñoquis caseros de papa con salsa a elección,60,Media,Pasta
-Ravioles de Ricota,Pasta rellena de ricota y nuez moscada hecha a mano,90,Alta,Pasta
-Fettuccine Alfredo,Pasta larga con crema y queso parmesano,30,Baja,Pasta
-Milanesa Napolitana,Milanesa de ternera con jamón salsa y queso gratinado,45,Media,Carnes
-Bife de Chorizo al Malbec,Bife sellado con reducción de vino tinto,45,Media,Carnes
-Pollo al Horno con Papas,Pollo entero al horno con papas y romero,60,Baja,Carnes
-Salmón Grillado,Filete de salmón a la plancha con limón,25,Media,Carnes
-Flan Casero,Flan de huevo con caramelo y dulce de leche,45,Media,Postres
-Brownie de Chocolate,Brownie húmedo con nueces,50,Baja,Postres
-Tiramisú,Postre italiano de café mascarpone y cacao,120,Alta,Postres
-Sopa de Calabaza,Crema de calabaza con jengibre y crutones,35,Baja,Sopas
-Caldo de Verduras,Caldo liviano de verduras de estación,30,Baja,Sopas
-Ensalada Caprese,Tomate mozzarella y albahaca con aceite de oliva,10,Baja,Ensaladas
-Ensalada Waldorf,Manzana apio nuez y mayonesa liviana,20,Baja,Ensaladas
+nombre,descripcion,tiempo_preparacion,dificultad,categoria,preparacion
+Lasaña de Verduras,Capas de pasta con vegetales asados y salsa blanca,75,Alta,Pasta,"Cortar las verduras en láminas finas y asarlas con aceite de oliva.|Preparar la salsa blanca con manteca, harina y leche.|Armar capas alternando pasta, verduras y salsa.|Terminar con queso rallado por encima.|Hornear 40 minutos a 180 grados y dejar reposar antes de cortar."
+Ñoquis de Papa,Ñoquis caseros de papa con salsa a elección,60,Media,Pasta,"Hervir las papas con cáscara hasta que estén tiernas.|Pisarlas en caliente y dejar entibiar.|Integrar la harina y el huevo sin amasar de más.|Formar cilindros y cortar los ñoquis.|Hervirlos hasta que suban a la superficie y servir con la salsa elegida."
+Ravioles de Ricota,Pasta rellena de ricota y nuez moscada hecha a mano,90,Alta,Pasta,"Hacer la masa con harina y huevos. Descansar 30 minutos.|Mezclar la ricota con nuez moscada, sal y pimienta.|Estirar la masa bien fina en dos planchas.|Distribuir el relleno y cerrar presionando los bordes.|Cortar los ravioles y hervirlos 4 minutos."
+Fettuccine Alfredo,Pasta larga con crema y queso parmesano,30,Baja,Pasta,"Hervir la pasta en abundante agua con sal.|Derretir la manteca en una sartén amplia.|Sumar la crema y calentar sin que llegue a hervir.|Incorporar el parmesano hasta fundirlo del todo.|Mezclar con la pasta y servir enseguida."
+Milanesa Napolitana,Milanesa de ternera con jamón salsa y queso gratinado,45,Media,Carnes,"Condimentar las milanesas con sal y pimienta.|Pasarlas por huevo batido y después por pan rallado.|Freírlas hasta que estén doradas de ambos lados.|Cubrirlas con salsa de tomate, jamón y queso.|Gratinar en el horno hasta que el queso se funda."
+Bife de Chorizo al Malbec,Bife sellado con reducción de vino tinto,45,Media,Carnes,"Sacar la carne de la heladera 20 minutos antes de cocinarla.|Sellar los bifes a fuego fuerte de ambos lados.|Retirarlos y reservarlos tapados.|Desglasar la sartén con el vino tinto y reducir a la mitad.|Napar los bifes con la reducción y servir."
+Pollo al Horno con Papas,Pollo entero al horno con papas y romero,60,Baja,Carnes,"Precalentar el horno a 200 grados.|Condimentar el pollo con sal, pimienta y romero.|Cortar las papas en gajos y acomodarlas alrededor.|Rociar todo con aceite de oliva.|Hornear 50 minutos dando vuelta las papas a mitad de cocción."
+Salmón Grillado,Filete de salmón a la plancha con limón,25,Media,Carnes,"Secar los filetes con papel de cocina.|Condimentar con sal, pimienta y jugo de limón.|Calentar la plancha hasta que humee.|Cocinar 4 minutos del lado de la piel y 2 del otro.|Servir con un chorrito de aceite de oliva."
+Flan Casero,Flan de huevo con caramelo y dulce de leche,45,Media,Postres,"Hacer el caramelo con azúcar y un poco de agua.|Volcarlo en la flanera y dejar que endurezca.|Batir los huevos con la leche y el azúcar sin hacer espuma.|Colar la mezcla sobre el caramelo.|Cocinar a baño maría 40 minutos y enfriar antes de desmoldar."
+Brownie de Chocolate,Brownie húmedo con nueces,50,Baja,Postres,"Derretir el chocolate con la manteca a baño maría.|Batir los huevos con el azúcar hasta que blanqueen.|Integrar el chocolate y después la harina con movimientos suaves.|Sumar las nueces picadas.|Hornear 30 minutos a 180 grados: el centro tiene que quedar húmedo."
+Tiramisú,Postre italiano de café mascarpone y cacao,120,Alta,Postres,"Preparar el café bien cargado y dejarlo enfriar.|Batir las yemas con el azúcar hasta que estén cremosas.|Integrar el mascarpone sin bajar la preparación.|Sumar las claras batidas a nieve con movimientos envolventes.|Mojar las vainillas en el café y armar capas alternadas.|Enfriar 4 horas y espolvorear con cacao antes de servir."
+Sopa de Calabaza,Crema de calabaza con jengibre y crutones,35,Baja,Sopas,"Pelar la calabaza y cortarla en cubos.|Rehogarla con el jengibre rallado.|Cubrir con caldo y cocinar 20 minutos.|Procesar hasta obtener una crema.|Servir con crutones por encima."
+Caldo de Verduras,Caldo liviano de verduras de estación,30,Baja,Sopas,"Cortar las verduras de estación en trozos parejos.|Llevarlas a hervor partiendo de agua fría con sal.|Bajar el fuego y cocinar 25 minutos.|Colar el caldo si se lo quiere bien liviano.|Corregir la sal antes de servir."
+Ensalada Caprese,Tomate mozzarella y albahaca con aceite de oliva,10,Baja,Ensaladas,"Cortar el tomate y la mozzarella en rodajas parejas.|Intercalarlas en el plato.|Sumar las hojas de albahaca fresca.|Condimentar con aceite de oliva, sal y pimienta.|Servir enseguida para que no suelte líquido."
+Ensalada Waldorf,Manzana apio nuez y mayonesa liviana,20,Baja,Ensaladas,"Cortar la manzana en cubos y rociarla con limón.|Picar el apio en trozos chicos.|Trozar las nueces con las manos.|Mezclar todo con la mayonesa liviana.|Enfriar 15 minutos antes de servir."

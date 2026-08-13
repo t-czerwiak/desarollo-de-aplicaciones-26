@@ -91,6 +91,7 @@ class Receta:
         dificultad: str,
         categoria_id: int,
         categoria_nombre: str = "",
+        preparacion: str = "",
     ):
         self.id = id
         self.nombre = nombre
@@ -99,7 +100,17 @@ class Receta:
         self.dificultad = dificultad
         self.categoria_id = categoria_id
         self.categoria_nombre = categoria_nombre
+        self.preparacion = preparacion
         self.ingredientes: list[RecetaIngrediente] = []
+
+    def pasos(self) -> list[str]:
+        """
+        Devuelve la preparación como lista de pasos, uno por renglón.
+
+        Ignora los renglones vacíos y los espacios sobrantes, así el texto que
+        se escribe en el formulario no necesita estar prolijo.
+        """
+        return [linea.strip() for linea in self.preparacion.splitlines() if linea.strip()]
 
     def es_compleja(self) -> bool:
         """Determina si la receta es compleja según su tiempo de preparación."""

@@ -102,3 +102,37 @@ class TestRecetaTiempoFormateado:
 
     def test_cero_minutos(self):
         assert self._receta(0).tiempo_formateado() == "0min"
+
+
+# ---------------------------------------------------------------------------
+# Receta – pasos
+# ---------------------------------------------------------------------------
+
+class TestRecetaPasos:
+    def _receta(self, preparacion: str) -> Receta:
+        return Receta(1, "Test", "", 30, "Media", 1, "", preparacion)
+
+    def test_varios_renglones(self):
+        receta = self._receta("Hervir el agua.\nCocinar la pasta.\nServir.")
+        assert receta.pasos() == ["Hervir el agua.", "Cocinar la pasta.", "Servir."]
+
+    def test_un_solo_paso(self):
+        assert self._receta("Mezclar todo.").pasos() == ["Mezclar todo."]
+
+    def test_sin_preparacion(self):
+        assert self._receta("").pasos() == []
+
+    def test_receta_sin_el_campo_no_tiene_pasos(self):
+        # El parámetro es opcional: una receta creada sin preparación no rompe.
+        assert Receta(1, "Test", "", 30, "Media", 1).pasos() == []
+
+    def test_descarta_renglones_vacios(self):
+        receta = self._receta("Primero.\n\n\nSegundo.\n")
+        assert receta.pasos() == ["Primero.", "Segundo."]
+
+    def test_limpia_espacios_sobrantes(self):
+        receta = self._receta("   Primero.   \n\t Segundo. ")
+        assert receta.pasos() == ["Primero.", "Segundo."]
+
+    def test_solo_espacios_no_es_paso(self):
+        assert self._receta("   \n\t\n  ").pasos() == []

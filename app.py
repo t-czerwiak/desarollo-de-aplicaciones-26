@@ -620,6 +620,16 @@ if seccion == SEC_RECETAS:
                         st.table(datos_ings)
                         st.write(f"**Costo total estimado:** ${receta_detalle.costo_total():.2f}")
 
+                    if receta_detalle:
+                        pasos = receta_detalle.pasos()
+                        st.write("**Preparación:**")
+                        if pasos:
+                            st.markdown(
+                                "\n".join(f"{i}. {paso}" for i, paso in enumerate(pasos, 1))
+                            )
+                        else:
+                            st.caption("Esta receta todavía no tiene pasos cargados.")
+
     # -----------------------------------------------------------------------
     # Tab: Nueva receta
     # -----------------------------------------------------------------------
@@ -643,6 +653,15 @@ if seccion == SEC_RECETAS:
                     "Categoría",
                     options=["— Sin categoría —"] + list(opciones_cat_nueva.keys()),
                 )
+
+            st.divider()
+            st.write("**Preparación**")
+            st.caption("Escribí un paso por renglón. Se muestran numerados en el listado.")
+            preparacion = st.text_area(
+                "Pasos de preparación",
+                height=160,
+                label_visibility="collapsed",
+            )
 
             st.divider()
             st.write("**Ingredientes**")
@@ -688,6 +707,7 @@ if seccion == SEC_RECETAS:
                     dificultad,
                     cat_id,
                     ingredientes_seleccionados,
+                    preparacion.strip(),
                 )
                 _show_success(f"Receta '{nombre.strip()}' creada correctamente.")
 
@@ -732,6 +752,16 @@ if seccion == SEC_RECETAS:
                         if receta_ed.categoria_nombre in opciones_cat_ed:
                             cat_actual_idx = cat_opciones_ed.index(receta_ed.categoria_nombre)
                         cat_ed = st.selectbox("Categoría", cat_opciones_ed, index=cat_actual_idx)
+
+                    st.divider()
+                    st.write("**Preparación**")
+                    st.caption("Escribí un paso por renglón. Se muestran numerados en el listado.")
+                    prep_ed = st.text_area(
+                        "Pasos de preparación",
+                        value=receta_ed.preparacion,
+                        height=160,
+                        label_visibility="collapsed",
+                    )
 
                     st.divider()
                     st.write("**Ingredientes**")
@@ -780,6 +810,7 @@ if seccion == SEC_RECETAS:
                             dif_ed,
                             cat_id_ed,
                             nuevos_ings,
+                            prep_ed.strip(),
                         )
                         if ok:
                             _show_success(f"Receta '{nombre_ed.strip()}' actualizada correctamente.")
