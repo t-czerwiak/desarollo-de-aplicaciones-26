@@ -138,14 +138,19 @@ h3 {
     color: var(--text-muted) !important;
 }
 
-/* ── Tabs ── */
-.stTabs [data-baseweb="tab-list"] {
+/* ── Tabs ──
+   Streamlit cambió las pestañas de BaseWeb a React Aria: las versiones viejas
+   las marcan con data-baseweb="tab" y las nuevas con data-testid="stTab".
+   Se estilan las dos para que se vea igual en local y en el deploy. */
+.stTabs [data-baseweb="tab-list"],
+.stTabs [role="tablist"] {
     background: transparent !important;
     border-bottom: 1px solid var(--border) !important;
     gap: 0 !important;
 }
 
-.stTabs [data-baseweb="tab"] {
+.stTabs [data-baseweb="tab"],
+.stTabs [data-testid="stTab"] {
     font-family: 'DM Sans', sans-serif !important;
     font-size: 0.7rem !important;
     font-weight: 700 !important;
@@ -158,12 +163,14 @@ h3 {
     transition: color 0.2s ease !important;
 }
 
-.stTabs [data-baseweb="tab"]:hover {
+.stTabs [data-baseweb="tab"]:hover,
+.stTabs [data-testid="stTab"]:hover {
     color: var(--text) !important;
     background: var(--gold-muted) !important;
 }
 
-.stTabs [aria-selected="true"][data-baseweb="tab"] {
+.stTabs [aria-selected="true"][data-baseweb="tab"],
+.stTabs [data-testid="stTab"][aria-selected="true"] {
     color: var(--gold) !important;
     background: transparent !important;
 }
@@ -173,9 +180,16 @@ h3 {
     height: 2px !important;
 }
 
+/* La versión nueva no tiene el elemento tab-highlight, así que el subrayado
+   de la pestaña activa se dibuja sobre la pestaña misma. */
+.stTabs [data-testid="stTab"][aria-selected="true"] {
+    box-shadow: inset 0 -2px 0 var(--gold) !important;
+}
+
 .stTabs [data-baseweb="tab-border"] { display: none !important; }
 
-.stTabs [data-baseweb="tab-panel"] {
+.stTabs [data-baseweb="tab-panel"],
+.stTabs [role="tabpanel"] {
     padding-top: 1.5em !important;
 }
 
