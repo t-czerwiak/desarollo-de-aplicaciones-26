@@ -9,6 +9,8 @@ Se puede correr desde la app (sección Estadísticas) o por consola:
     python importar_datos.py
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 import pandas as pd
