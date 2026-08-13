@@ -60,13 +60,32 @@ def init_db() -> None:
             );
             """
         )
-        _seed_data(conn)
+        primera_vez = _seed_data(conn)
+
+    # Fuera del bloque anterior para que las categorías ya estén confirmadas
+    # cuando el importador abra su propia conexión.
+    if primera_vez:
+        _importar_dataset_inicial()
 
 
-def _seed_data(conn: sqlite3.Connection) -> None:
-    """Inserta datos de ejemplo sólo si las tablas están vacías."""
+def _importar_dataset_inicial() -> None:
+    """Carga el dataset del CSV la primera vez que se arma la base."""
+    import importar_datos  # diferido: importar_datos también importa este módulo
+
+    try:
+        importar_datos.importar_recetas_csv()
+    except FileNotFoundError:
+        pass  # sin el CSV la app igual arranca con los datos de ejemplo
+
+
+def _seed_data(conn: sqlite3.Connection) -> bool:
+    """
+    Inserta datos de ejemplo sólo si las tablas están vacías.
+
+    :returns: True si insertó los datos, False si la base ya tenía contenido.
+    """
     if conn.execute("SELECT COUNT(*) FROM categorias").fetchone()[0] > 0:
-        return
+        return False
 
     categorias = [
         ("Pasta", "Platos a base de pasta fresca o seca"),
@@ -152,6 +171,7 @@ def _seed_data(conn: sqlite3.Connection) -> None:
         "INSERT INTO receta_ingredientes (receta_id, ingrediente_id, cantidad) VALUES (?, ?, ?)",
         receta_ings,
     )
+    return True
 
 
 # ---------------------------------------------------------------------------

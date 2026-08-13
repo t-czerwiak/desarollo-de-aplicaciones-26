@@ -1,0 +1,16 @@
+nombre,descripcion,tiempo_preparacion,dificultad,categoria
+Lasaña de Verduras,Capas de pasta con vegetales asados y salsa blanca,75,Alta,Pasta
+Ñoquis de Papa,Ñoquis caseros de papa con salsa a elección,60,Media,Pasta
+Ravioles de Ricota,Pasta rellena de ricota y nuez moscada hecha a mano,90,Alta,Pasta
+Fettuccine Alfredo,Pasta larga con crema y queso parmesano,30,Baja,Pasta
+Milanesa Napolitana,Milanesa de ternera con jamón salsa y queso gratinado,45,Media,Carnes
+Bife de Chorizo al Malbec,Bife sellado con reducción de vino tinto,45,Media,Carnes
+Pollo al Horno con Papas,Pollo entero al horno con papas y romero,60,Baja,Carnes
+Salmón Grillado,Filete de salmón a la plancha con limón,25,Media,Carnes
+Flan Casero,Flan de huevo con caramelo y dulce de leche,45,Media,Postres
+Brownie de Chocolate,Brownie húmedo con nueces,50,Baja,Postres
+Tiramisú,Postre italiano de café mascarpone y cacao,120,Alta,Postres
+Sopa de Calabaza,Crema de calabaza con jengibre y crutones,35,Baja,Sopas
+Caldo de Verduras,Caldo liviano de verduras de estación,30,Baja,Sopas
+Ensalada Caprese,Tomate mozzarella y albahaca con aceite de oliva,10,Baja,Ensaladas
+Ensalada Waldorf,Manzana apio nuez y mayonesa liviana,20,Baja,Ensaladas

@@ -3,11 +3,11 @@ Chef Master Pro – Aplicación principal de Streamlit.
 Sistema de Gestión del Instituto ORT Cuisine.
 """
 
+import pandas as pd
 import streamlit as st
-from streamlit_option_menu import option_menu
 
 import database as db
-from models import Receta, Ingrediente, Categoria
+import importar_datos
 
 # ---------------------------------------------------------------------------
 # Configuración de la página
@@ -427,14 +427,79 @@ st.markdown(f"<style>{_CSS}</style>", unsafe_allow_html=True)
 
 DIFICULTADES = ["Baja", "Media", "Alta"]
 
-
-def _badge_dificultad(dificultad: str) -> str:
-    return dificultad
+# Etiquetas del menú lateral. Se usan tanto para dibujar el menú como para
+# decidir qué sección mostrar, así no vuelven a quedar desincronizadas.
+SEC_RECETAS = "📋 Recetas"
+SEC_INGREDIENTES = "🥦 Ingredientes"
+SEC_CATEGORIAS = "🗂️ Categorías"
+SEC_ESTADISTICAS = "📊 Estadísticas"
 
 
 def _show_success(msg: str) -> None:
     st.success(msg)
     st.rerun()
+
+
+def _interpretar_tiempos(tiempos: pd.Series) -> str:
+    """
+    Arma el párrafo que interpreta las medidas de tendencia central.
+
+    Se calcula sobre los datos reales en vez de dejarlo escrito a mano, así el
+    texto sigue siendo cierto aunque se carguen o borren recetas.
+    """
+    media = tiempos.mean()
+    mediana = tiempos.median()
+    moda = tiempos.mode()
+
+    # Cuánto se corre la media respecto de la mediana, en proporción a la mediana.
+    diferencia = media - mediana
+    desvio_relativo = abs(diferencia) / mediana * 100 if mediana else 0
+
+    if desvio_relativo < 5:
+        forma = (
+            f"La media ({media:.2f} min) y la mediana ({mediana:.0f} min) son casi iguales, "
+            "así que los tiempos de preparación se reparten de forma bastante simétrica: "
+            "no hay recetas extremas que arrastren el promedio para ningún lado."
+        )
+    elif diferencia > 0:
+        forma = (
+            f"La media ({media:.2f} min) es más alta que la mediana ({mediana:.0f} min). "
+            "Eso pasa porque unas pocas recetas muy largas empujan el promedio hacia arriba, "
+            "mientras que la mitad del recetario se prepara en "
+            f"{mediana:.0f} minutos o menos. En un caso así la mediana describe mejor "
+            "a la receta típica que la media."
+        )
+    else:
+        forma = (
+            f"La media ({media:.2f} min) es más baja que la mediana ({mediana:.0f} min): "
+            "hay un grupo de recetas muy rápidas que tira el promedio hacia abajo, "
+            "aunque la mayoría de las preparaciones lleve más tiempo que eso."
+        )
+
+    repeticiones = int((tiempos == moda.iloc[0]).sum())
+    veces = "vez" if repeticiones == 1 else "veces"
+
+    if len(moda) > 1:
+        valores = " y ".join(f"{v:.0f} min" for v in moda)
+        claridad = (
+            f"No hay una moda única: {valores} se repiten la misma cantidad de veces "
+            f"({repeticiones} cada uno), así que los valores están bastante repartidos "
+            "y ningún tiempo domina al resto."
+        )
+    elif repeticiones <= 2:
+        claridad = (
+            f"La moda es {moda.iloc[0]:.0f} min, pero aparece apenas {repeticiones} {veces} "
+            f"sobre {len(tiempos)} recetas: casi todos los tiempos son distintos, "
+            "por lo que la moda no aporta demasiado en este conjunto."
+        )
+    else:
+        claridad = (
+            f"La moda es clara: {moda.iloc[0]:.0f} min aparece {repeticiones} {veces} "
+            f"sobre {len(tiempos)} recetas, o sea que es la duración más habitual "
+            "a la hora de planificar la cocina."
+        )
+
+    return f"{forma} {claridad}"
 
 
 # ---------------------------------------------------------------------------
@@ -447,7 +512,7 @@ st.sidebar.divider()
 
 seccion = st.sidebar.radio(
     "Menú principal",
-    options=["📋 Recetas", "🥦 Ingredientes", "🗂️ Categorías"],
+    options=[SEC_RECETAS, SEC_INGREDIENTES, SEC_CATEGORIAS, SEC_ESTADISTICAS],
     label_visibility="collapsed",
 )
 
@@ -458,7 +523,7 @@ st.sidebar.info("Sistema de Gestión Gastronómica\n\nInstituto ORT Cuisine © 2
 # SECCIÓN: RECETAS
 # ===========================================================================
 
-if seccion == "Recetas":
+if seccion == SEC_RECETAS:
     st.title("Gestión de Recetas")
 
     tab_lista, tab_nueva, tab_editar, tab_eliminar = st.tabs(
@@ -522,7 +587,7 @@ if seccion == "Recetas":
                         st.write(f"**Categoría:** {receta.categoria_nombre or '—'}")
                     with col_b:
                         st.metric("Tiempo", receta.tiempo_formateado())
-                        st.write(_badge_dificultad(receta.dificultad))
+                        st.write(receta.dificultad)
                         if receta.es_compleja():
                             st.caption("Receta compleja")
 
@@ -738,7 +803,7 @@ if seccion == "Recetas":
 # SECCIÓN: INGREDIENTES
 # ===========================================================================
 
-elif seccion == "Ingredientes":
+elif seccion == SEC_INGREDIENTES:
     st.title("Inventario de Ingredientes")
 
     tab_lista, tab_nuevo, tab_editar, tab_eliminar = st.tabs(
@@ -911,7 +976,7 @@ elif seccion == "Ingredientes":
 # SECCIÓN: CATEGORÍAS
 # ===========================================================================
 
-elif seccion == "Categorías":
+elif seccion == SEC_CATEGORIAS:
     st.title("Categorías de Cocina")
 
     tab_lista, tab_nueva, tab_editar, tab_eliminar = st.tabs(
@@ -935,7 +1000,7 @@ elif seccion == "Categorías":
                     if recetas_cat:
                         st.write(f"**Recetas en esta categoría ({len(recetas_cat)}):**")
                         for r in recetas_cat:
-                            st.write(f"  • {r.nombre} — {r.tiempo_formateado()} — {_badge_dificultad(r.dificultad)}")
+                            st.write(f"  • {r.nombre} — {r.tiempo_formateado()} — {r.dificultad}")
                     else:
                         st.caption("Sin recetas asignadas a esta categoría.")
 
@@ -1020,3 +1085,94 @@ elif seccion == "Categorías":
                         _show_success(f"Categoría '{cat_del_obj.nombre}' eliminada.")
                     else:
                         st.error("No se pudo eliminar la categoría.")
+
+# ===========================================================================
+# SECCIÓN: ESTADÍSTICAS
+# ===========================================================================
+
+elif seccion == SEC_ESTADISTICAS:
+    st.title("Análisis de Datos")
+
+    tab_medidas, tab_importar = st.tabs(["Tendencia Central", "Importar Dataset"])
+
+    # -----------------------------------------------------------------------
+    # Tab: Medidas de tendencia central
+    # -----------------------------------------------------------------------
+    with tab_medidas:
+        st.subheader("Medidas de tendencia central")
+        st.caption("Variable analizada: tiempo de preparación (minutos)")
+
+        # Los datos se leen directamente de la base con Pandas.
+        with db.get_connection() as conn:
+            df_recetas = pd.read_sql_query(
+                "SELECT nombre, tiempo_preparacion, dificultad FROM recetas", conn
+            )
+
+        if df_recetas.empty:
+            st.info(
+                "Todavía no hay recetas cargadas. "
+                "Importá el dataset desde la pestaña de al lado."
+            )
+        else:
+            tiempos = df_recetas["tiempo_preparacion"]
+
+            media = tiempos.mean()
+            mediana = tiempos.median()
+            moda = tiempos.mode()  # puede traer más de un valor si hay empate
+
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Media", f"{media:.2f} min")
+            col2.metric("Mediana", f"{mediana:.0f} min")
+            col3.metric("Moda", " / ".join(f"{v:.0f} min" for v in moda))
+
+            st.caption(f"Calculado sobre {len(tiempos)} recetas de la base de datos.")
+
+            st.divider()
+
+            st.subheader("Interpretación")
+            st.write(_interpretar_tiempos(tiempos))
+
+            moda_dificultad = df_recetas["dificultad"].mode()
+            st.caption(
+                "Como dato extra, la dificultad más frecuente es "
+                f"**{' / '.join(moda_dificultad)}** (moda de una columna no numérica)."
+            )
+
+            with st.expander("Ver los datos usados en el cálculo"):
+                st.dataframe(df_recetas, use_container_width=True)
+
+    # -----------------------------------------------------------------------
+    # Tab: Importar el CSV
+    # -----------------------------------------------------------------------
+    with tab_importar:
+        st.subheader("Importar dataset desde CSV")
+        st.write(
+            "Lee `datos/recetas.csv` con `pandas.read_csv()` y da de alta cada fila "
+            "con la misma función que usa el formulario de Nueva Receta."
+        )
+
+        try:
+            df_csv = pd.read_csv(importar_datos.CSV_RECETAS)
+        except FileNotFoundError:
+            df_csv = None
+            st.error(f"No se encontró el archivo {importar_datos.CSV_RECETAS}.")
+
+        if df_csv is not None:
+            st.caption(
+                f"El archivo tiene **{len(df_csv)}** filas "
+                f"y {len(df_csv.columns)} columnas."
+            )
+            st.dataframe(df_csv, use_container_width=True)
+
+            if st.button("Importar a la base de datos", type="primary", key="btn_importar_csv"):
+                nuevas, repetidas = importar_datos.importar_recetas_csv()
+                if nuevas:
+                    _show_success(
+                        f"Se importaron {nuevas} receta(s). "
+                        f"{repetidas} ya estaban cargadas y se omitieron."
+                    )
+                else:
+                    st.info(
+                        f"No se importó ninguna receta nueva: las {repetidas} filas "
+                        "del CSV ya están en la base."
+                    )
