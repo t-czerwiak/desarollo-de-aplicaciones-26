@@ -155,9 +155,3 @@ python -m pytest -v
 Publicado en **Streamlit Community Cloud**, conectado a la rama `main` de este repositorio.
 
 La base de datos vive en el disco del contenedor y no está versionada, así que si la plataforma reinicia la aplicación se regenera desde el seed y el CSV, volviendo a las 20 recetas iniciales. Los cambios que se carguen desde la app publicada no son permanentes.
-
-## Autores
-
-<!-- Completar con los nombres del grupo -->
-
-Instituto ORT Argentina — 5° año, Desarrollo de Aplicaciones.
