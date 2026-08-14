@@ -1,6 +1,6 @@
 """
 Tests unitarios para las clases del dominio (models.py).
-Ejecutar con: python -m pytest tests_models.py -v
+Ejecutar con: python -m pytest -v
 """
 
 import pytest

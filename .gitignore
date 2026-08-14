@@ -1,1 +1,11 @@
+# Base de datos local: se regenera sola con init_db()
 chef_master.db
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Herramientas
+.pytest_cache/
+.venv/
+venv/

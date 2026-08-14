@@ -51,7 +51,7 @@ Para borrar todo y empezar de cero, alcanza con eliminar `chef_master.db` y volv
 ├── models.py            Clases del dominio: Categoria, Ingrediente, Receta
 ├── database.py          Esquema, migraciones, datos de ejemplo y CRUD
 ├── importar_datos.py    Importación del dataset CSV con Pandas
-├── tests_models.py      Tests unitarios de la lógica del dominio
+├── test_models.py       Tests unitarios de la lógica del dominio
 ├── datos/
 │   └── recetas.csv      Dataset de 15 recetas
 ├── requirements.txt
@@ -145,12 +145,10 @@ En este dataset la media es más alta que la mediana porque unas pocas recetas m
 ## Tests
 
 ```bash
-python -m pytest tests_models.py -v
+python -m pytest -v
 ```
 
 31 tests sobre la lógica del dominio: el cálculo de costos, la disponibilidad de stock, la clasificación de recetas por complejidad, el formateo de tiempos y el parseo de pasos y variaciones.
-
-> El archivo se llama `tests_models.py`, que no coincide con el patrón `test_*.py` que busca pytest por defecto, así que hay que nombrarlo explícitamente como en el comando de arriba.
 
 ## Deploy
 
