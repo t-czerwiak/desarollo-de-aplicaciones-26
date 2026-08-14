@@ -4,6 +4,16 @@ Define las entidades: Categoria, Ingrediente y Receta.
 """
 
 
+def _renglones(texto: str) -> list[str]:
+    """
+    Parte un texto en una lista, tomando un elemento por renglón.
+
+    Ignora los renglones vacíos y los espacios sobrantes, así lo que se escribe
+    en los formularios no necesita estar prolijo.
+    """
+    return [linea.strip() for linea in texto.splitlines() if linea.strip()]
+
+
 class Categoria:
     """Representa una categoría de cocina (ej: Pasta, Carnes, Postres)."""
 
@@ -92,6 +102,7 @@ class Receta:
         categoria_id: int,
         categoria_nombre: str = "",
         preparacion: str = "",
+        variaciones: str = "",
     ):
         self.id = id
         self.nombre = nombre
@@ -101,16 +112,16 @@ class Receta:
         self.categoria_id = categoria_id
         self.categoria_nombre = categoria_nombre
         self.preparacion = preparacion
+        self.variaciones = variaciones
         self.ingredientes: list[RecetaIngrediente] = []
 
     def pasos(self) -> list[str]:
-        """
-        Devuelve la preparación como lista de pasos, uno por renglón.
+        """Devuelve la preparación como lista de pasos, uno por renglón."""
+        return _renglones(self.preparacion)
 
-        Ignora los renglones vacíos y los espacios sobrantes, así el texto que
-        se escribe en el formulario no necesita estar prolijo.
-        """
-        return [linea.strip() for linea in self.preparacion.splitlines() if linea.strip()]
+    def variantes(self) -> list[str]:
+        """Devuelve las variaciones de la receta, una por renglón."""
+        return _renglones(self.variaciones)
 
     def es_compleja(self) -> bool:
         """Determina si la receta es compleja según su tiempo de preparación."""

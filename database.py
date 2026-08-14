@@ -42,7 +42,8 @@ def init_db() -> None:
                 tiempo_preparacion  INTEGER NOT NULL DEFAULT 0,
                 dificultad          TEXT    NOT NULL DEFAULT 'Media',
                 categoria_id        INTEGER REFERENCES categorias(id) ON DELETE SET NULL,
-                preparacion         TEXT    NOT NULL DEFAULT ''
+                preparacion         TEXT    NOT NULL DEFAULT '',
+                variaciones         TEXT    NOT NULL DEFAULT ''
             );
 
             CREATE TABLE IF NOT EXISTS ingredientes (
@@ -70,6 +71,14 @@ def init_db() -> None:
         _importar_dataset_inicial()
 
 
+# Columnas agregadas después de la primera versión del esquema, con su
+# definición para el ALTER TABLE.
+COLUMNAS_NUEVAS_RECETAS = {
+    "preparacion": "TEXT NOT NULL DEFAULT ''",
+    "variaciones": "TEXT NOT NULL DEFAULT ''",
+}
+
+
 def _migrar_esquema(conn: sqlite3.Connection) -> None:
     """
     Agrega al vuelo las columnas que falten en bases ya creadas.
@@ -78,8 +87,9 @@ def _migrar_esquema(conn: sqlite3.Connection) -> None:
     esto una base vieja se quedaría sin las columnas nuevas.
     """
     columnas = {row["name"] for row in conn.execute("PRAGMA table_info(recetas)")}
-    if "preparacion" not in columnas:
-        conn.execute("ALTER TABLE recetas ADD COLUMN preparacion TEXT NOT NULL DEFAULT ''")
+    for nombre, definicion in COLUMNAS_NUEVAS_RECETAS.items():
+        if nombre not in columnas:
+            conn.execute(f"ALTER TABLE recetas ADD COLUMN {nombre} {definicion}")
 
 
 def _importar_dataset_inicial() -> None:
@@ -128,6 +138,40 @@ def _seed_data(conn: sqlite3.Connection) -> bool:
         ("Queso Parmesano", "g", 0.015, 800),
         ("Albahaca", "g", 0.025, 300),
         ("Pasta Seca", "g", 0.003, 2500),
+        # Verduras y frutas
+        ("Papa", "g", 0.002, 8000),
+        ("Calabaza", "g", 0.003, 4000),
+        ("Zucchini", "g", 0.004, 2000),
+        ("Berenjena", "g", 0.004, 2000),
+        ("Zanahoria", "g", 0.002, 3000),
+        ("Cebolla", "g", 0.002, 4000),
+        ("Apio", "g", 0.003, 1500),
+        ("Manzana", "g", 0.004, 3000),
+        ("Limón", "unidad", 0.25, 40),
+        ("Jengibre", "g", 0.020, 300),
+        ("Romero", "g", 0.030, 150),
+        # Carnes y pescados
+        ("Carne de Ternera", "g", 0.011, 3000),
+        ("Bife de Chorizo", "g", 0.015, 3000),
+        ("Salmón", "g", 0.022, 1500),
+        ("Jamón", "g", 0.014, 1000),
+        # Lácteos
+        ("Ricota", "g", 0.007, 1500),
+        ("Queso Mozzarella", "g", 0.010, 2500),
+        ("Mascarpone", "g", 0.016, 1200),
+        ("Crema", "ml", 0.006, 2000),
+        # Almacén y repostería
+        ("Pan Rallado", "g", 0.003, 2000),
+        ("Pan", "g", 0.004, 2000),
+        ("Chocolate", "g", 0.012, 1500),
+        ("Cacao", "g", 0.018, 400),
+        ("Dulce de Leche", "g", 0.005, 2000),
+        ("Vainillas", "g", 0.009, 1000),
+        ("Nuez", "g", 0.028, 800),
+        ("Nuez Moscada", "g", 0.040, 100),
+        ("Mayonesa", "g", 0.006, 1500),
+        ("Café", "ml", 0.004, 2000),
+        ("Vino Tinto", "ml", 0.005, 1500),
     ]
     conn.executemany(
         "INSERT INTO ingredientes (nombre, unidad, precio_unitario, stock) VALUES (?, ?, ?, ?)",
@@ -146,6 +190,9 @@ def _seed_data(conn: sqlite3.Connection) -> bool:
             "Agregar el tomate y cocinar la salsa a fuego bajo 20 minutos.\n"
             "Cocinar la pasta seca hasta que esté al dente.\n"
             "Mezclar la pasta con la salsa y servir con parmesano rallado.",
+            "Versión vegetariana: reemplazar la carne molida por lentejas cocidas.\n"
+            "Versión al horno: gratinar con más parmesano 15 minutos antes de servir.\n"
+            "Versión picante: sumar ají molido al sofrito.",
         ),
         (
             "Tarta de Manzana", "Postre casero de manzana con masa quebrada", 90, "Alta", cat["Postres"],
@@ -154,6 +201,9 @@ def _seed_data(conn: sqlite3.Connection) -> bool:
             "Estirar la masa y forrar un molde de tarta.\n"
             "Pelar las manzanas, cortarlas en gajos finos y acomodarlas en espiral.\n"
             "Espolvorear con azúcar y hornear 40 minutos a 180 grados.",
+            "Versión con crumble: cubrirla con un arenado de harina, manteca y azúcar.\n"
+            "Versión con pera: reemplazar la mitad de las manzanas por peras.\n"
+            "Versión con canela: sumar una cucharadita a los gajos antes de hornear.",
         ),
         (
             "Pollo al Limón", "Pechuga de pollo marinada con limón y hierbas", 35, "Baja", cat["Carnes"],
@@ -162,6 +212,9 @@ def _seed_data(conn: sqlite3.Connection) -> bool:
             "Sellar el pollo 5 minutos de cada lado.\n"
             "Bajar el fuego y terminar la cocción tapado 15 minutos.\n"
             "Dejar reposar unos minutos antes de servir.",
+            "Versión al horno: cocinar las pechugas 25 minutos a 200 grados.\n"
+            "Versión con miel: sumar una cucharada a la marinada para que caramelice.\n"
+            "Versión con muslos: usar muslos y estirar la cocción 10 minutos.",
         ),
         (
             "Sopa de Tomate", "Crema de tomate fresca con albahaca", 30, "Baja", cat["Sopas"],
@@ -169,6 +222,9 @@ def _seed_data(conn: sqlite3.Connection) -> bool:
             "Agregar agua caliente y sal. Cocinar 15 minutos.\n"
             "Procesar hasta obtener una crema lisa.\n"
             "Corregir la sal y sumar la albahaca fresca al final.",
+            "Versión cremosa: sumar un chorro de crema al procesar.\n"
+            "Versión con morrón: asar un morrón rojo y procesarlo junto con el tomate.\n"
+            "Versión fría: servirla tipo gazpacho, sin cocinar el tomate.",
         ),
         (
             "Ensalada César", "Ensalada con aderezo césar y crutones", 15, "Baja", cat["Ensaladas"],
@@ -176,11 +232,14 @@ def _seed_data(conn: sqlite3.Connection) -> bool:
             "Preparar el aderezo con aceite de oliva, ajo y parmesano.\n"
             "Tostar los crutones en la sartén.\n"
             "Mezclar todo justo antes de servir para que no se ablande.",
+            "Versión con pollo: sumar pechuga grillada en tiras.\n"
+            "Versión sin gluten: reemplazar los crutones por semillas tostadas.\n"
+            "Versión liviana: cambiar el aderezo césar por yogur natural con limón.",
         ),
     ]
     conn.executemany(
-        "INSERT INTO recetas (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id, preparacion) "
-        "VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT INTO recetas (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id, "
+        "preparacion, variaciones) VALUES (?, ?, ?, ?, ?, ?, ?)",
         recetas,
     )
 
@@ -199,6 +258,7 @@ def _seed_data(conn: sqlite3.Connection) -> bool:
         (rec["Tarta de Manzana"], ing["Manteca"], 125),
         (rec["Tarta de Manzana"], ing["Azúcar"], 100),
         (rec["Tarta de Manzana"], ing["Huevo"], 2),
+        (rec["Tarta de Manzana"], ing["Manzana"], 600),
         # Pollo al Limón
         (rec["Pollo al Limón"], ing["Pollo"], 400),
         (rec["Pollo al Limón"], ing["Aceite de Oliva"], 20),
@@ -345,7 +405,7 @@ def listar_recetas(
     """
     query = """
         SELECT r.id, r.nombre, r.descripcion, r.tiempo_preparacion,
-               r.dificultad, r.categoria_id, r.preparacion,
+               r.dificultad, r.categoria_id, r.preparacion, r.variaciones,
                COALESCE(c.nombre, '') AS categoria_nombre
         FROM recetas r
         LEFT JOIN categorias c ON r.categoria_id = c.id
@@ -377,6 +437,7 @@ def listar_recetas(
             r["categoria_id"],
             r["categoria_nombre"],
             r["preparacion"],
+            r["variaciones"],
         )
         recetas.append(receta)
     return recetas
@@ -388,7 +449,7 @@ def obtener_receta(receta_id: int) -> Optional[Receta]:
         row = conn.execute(
             """
             SELECT r.id, r.nombre, r.descripcion, r.tiempo_preparacion,
-                   r.dificultad, r.categoria_id, r.preparacion,
+                   r.dificultad, r.categoria_id, r.preparacion, r.variaciones,
                    COALESCE(c.nombre, '') AS categoria_nombre
             FROM recetas r
             LEFT JOIN categorias c ON r.categoria_id = c.id
@@ -407,6 +468,7 @@ def obtener_receta(receta_id: int) -> Optional[Receta]:
             row["categoria_id"],
             row["categoria_nombre"],
             row["preparacion"],
+            row["variaciones"],
         )
         ing_rows = conn.execute(
             """
@@ -431,18 +493,20 @@ def crear_receta(
     categoria_id: Optional[int],
     ingredientes: list[tuple[int, float]],
     preparacion: str = "",
+    variaciones: str = "",
 ) -> Receta:
     """
     Crea una receta con sus ingredientes asociados.
 
     :param ingredientes: Lista de tuplas (ingrediente_id, cantidad).
     :param preparacion:  Pasos de preparación, uno por renglón.
+    :param variaciones:  Variantes de la receta, una por renglón.
     """
     with get_connection() as conn:
         cur = conn.execute(
-            "INSERT INTO recetas (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id, preparacion) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
-            (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id, preparacion),
+            "INSERT INTO recetas (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id, "
+            "preparacion, variaciones) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id, preparacion, variaciones),
         )
         receta_id = cur.lastrowid
         if ingredientes:
@@ -462,12 +526,14 @@ def actualizar_receta(
     categoria_id: Optional[int],
     ingredientes: list[tuple[int, float]],
     preparacion: str = "",
+    variaciones: str = "",
 ) -> bool:
     """
     Actualiza una receta y reemplaza sus ingredientes.
 
     :param ingredientes: Lista de tuplas (ingrediente_id, cantidad).
     :param preparacion:  Pasos de preparación, uno por renglón.
+    :param variaciones:  Variantes de la receta, una por renglón.
     :returns: True si se actualizó el registro.
     """
     with get_connection() as conn:
@@ -475,10 +541,11 @@ def actualizar_receta(
             """
             UPDATE recetas
             SET nombre=?, descripcion=?, tiempo_preparacion=?, dificultad=?,
-                categoria_id=?, preparacion=?
+                categoria_id=?, preparacion=?, variaciones=?
             WHERE id=?
             """,
-            (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id, preparacion, receta_id),
+            (nombre, descripcion, tiempo_preparacion, dificultad, categoria_id,
+             preparacion, variaciones, receta_id),
         )
         if cur.rowcount == 0:
             return False

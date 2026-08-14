@@ -136,3 +136,32 @@ class TestRecetaPasos:
 
     def test_solo_espacios_no_es_paso(self):
         assert self._receta("   \n\t\n  ").pasos() == []
+
+
+# ---------------------------------------------------------------------------
+# Receta – variantes
+# ---------------------------------------------------------------------------
+
+class TestRecetaVariantes:
+    def _receta(self, variaciones: str) -> Receta:
+        return Receta(1, "Test", "", 30, "Media", 1, "", "", variaciones)
+
+    def test_varias_variaciones(self):
+        receta = self._receta("Versión vegetariana.\nVersión picante.")
+        assert receta.variantes() == ["Versión vegetariana.", "Versión picante."]
+
+    def test_sin_variaciones(self):
+        assert self._receta("").variantes() == []
+
+    def test_receta_sin_el_campo_no_tiene_variantes(self):
+        # Las variaciones son opcionales: una receta sin ellas no rompe.
+        assert Receta(1, "Test", "", 30, "Media", 1).variantes() == []
+
+    def test_descarta_renglones_vacios_y_espacios(self):
+        receta = self._receta("  Primera.  \n\n\n\t Segunda. \n")
+        assert receta.variantes() == ["Primera.", "Segunda."]
+
+    def test_preparacion_y_variaciones_son_independientes(self):
+        receta = Receta(1, "Test", "", 30, "Media", 1, "", "Un paso.", "Una variante.")
+        assert receta.pasos() == ["Un paso."]
+        assert receta.variantes() == ["Una variante."]

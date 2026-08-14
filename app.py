@@ -630,6 +630,12 @@ if seccion == SEC_RECETAS:
                         else:
                             st.caption("Esta receta todavía no tiene pasos cargados.")
 
+                        # Las variaciones son opcionales: si no hay, no se muestra nada.
+                        variantes = receta_detalle.variantes()
+                        if variantes:
+                            st.write("**Variaciones:**")
+                            st.markdown("\n".join(f"- {v}" for v in variantes))
+
     # -----------------------------------------------------------------------
     # Tab: Nueva receta
     # -----------------------------------------------------------------------
@@ -660,6 +666,15 @@ if seccion == SEC_RECETAS:
             preparacion = st.text_area(
                 "Pasos de preparación",
                 height=160,
+                label_visibility="collapsed",
+            )
+
+            st.divider()
+            st.write("**Variaciones**")
+            st.caption("Opcional: una variante por renglón (por ejemplo, la versión vegetariana).")
+            variaciones = st.text_area(
+                "Variaciones de la receta",
+                height=110,
                 label_visibility="collapsed",
             )
 
@@ -708,6 +723,7 @@ if seccion == SEC_RECETAS:
                     cat_id,
                     ingredientes_seleccionados,
                     preparacion.strip(),
+                    variaciones.strip(),
                 )
                 _show_success(f"Receta '{nombre.strip()}' creada correctamente.")
 
@@ -764,6 +780,16 @@ if seccion == SEC_RECETAS:
                     )
 
                     st.divider()
+                    st.write("**Variaciones**")
+                    st.caption("Opcional: una variante por renglón.")
+                    var_ed = st.text_area(
+                        "Variaciones de la receta",
+                        value=receta_ed.variaciones,
+                        height=110,
+                        label_visibility="collapsed",
+                    )
+
+                    st.divider()
                     st.write("**Ingredientes**")
                     nuevos_ings = []
                     if ingredientes_todos:
@@ -811,6 +837,7 @@ if seccion == SEC_RECETAS:
                             cat_id_ed,
                             nuevos_ings,
                             prep_ed.strip(),
+                            var_ed.strip(),
                         )
                         if ok:
                             _show_success(f"Receta '{nombre_ed.strip()}' actualizada correctamente.")
